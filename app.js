@@ -143,7 +143,7 @@ function drawImage() {
 function drawLines() {
     ctx.lineWidth = 2;
     ctx.strokeStyle = 'red';
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = 'yellow';
     lines.forEach(line => {
         ctx.beginPath();
         ctx.moveTo(line.startX, line.startY);
