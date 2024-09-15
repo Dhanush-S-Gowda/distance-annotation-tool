@@ -153,10 +153,12 @@ function drawLines() {
     });
 }
 
+
 function updateLineIds() {
     // Reassign IDs to lines and adjust the nextLineId
     lines.forEach((line, index) => {
-        line.id = index + 1;
+        line.id = index; // Start IDs from 0
     });
-    nextLineId = lines.length + 1; // Update nextLineId for new lines
+    nextLineId = lines.length; // Update nextLineId for new lines
 }
+
