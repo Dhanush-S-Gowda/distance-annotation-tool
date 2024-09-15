@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Annotation Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #canvas {
+            border: 1px solid black;
+            cursor: crosshair;
+        }
+        .controls {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <input type="file" id="upload" accept="image/*">
+        <canvas id="canvas"></canvas>
+        <div class="controls">
+            <!-- Remove zoom buttons -->
+            <button id="export-json">Export as JSON</button>
+            <button id="delete-mode">Toggle Eraser Mode</button>
+            <button id="brightness-increase">Increase Brightness</button>
+            <button id="brightness-decrease">Decrease Brightness</button>
+            <button id="contrast-increase">Increase Contrast</button>
+            <button id="contrast-decrease">Decrease Contrast</button>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
