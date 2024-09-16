@@ -31,4 +31,4 @@ You can try out a live version of the tool [here](https://dhanush-s-gowda.github
 This project was created using AI (GPT) and contributions from:
 
 - [Dhanush S Gowda](https://github.com/Dhanush-S-Gowda)
-- [s](https://github.com/contributor1)
+- [R Keerthana Prasad](https://github.com/Keerthana-prasad)
