@@ -7,7 +7,6 @@ const brightnessIncreaseButton = document.getElementById('brightness-increase');
 const brightnessDecreaseButton = document.getElementById('brightness-decrease');
 const contrastIncreaseButton = document.getElementById('contrast-increase');
 const contrastDecreaseButton = document.getElementById('contrast-decrease');
-const lineNameInput = document.getElementById('line-name');
 const lineColorInput = document.getElementById('line-color');
 
 let img = new Image();
@@ -49,7 +48,6 @@ canvas.addEventListener('mousedown', (e) => {
         startY = y;
         isResizing = isNearPoint(x, y, selectedLine.endX, selectedLine.endY);
         isDragging = !isResizing;
-        lineNameInput.value = selectedLine.name || '';
         lineColorInput.value = selectedLine.color || '#000000';
     } else {
         currentLine = { 
@@ -58,7 +56,6 @@ canvas.addEventListener('mousedown', (e) => {
             startY: y, 
             endX: x, 
             endY: y, 
-            name: lineNameInput.value, 
             color: lineColorInput.value 
         };
         isDragging = true;
@@ -66,8 +63,6 @@ canvas.addEventListener('mousedown', (e) => {
 });
 
 canvas.addEventListener('mousemove', (e) => {
-    if (deleteMode) return;
-
     const x = e.offsetX;
     const y = e.offsetY;
 
@@ -81,6 +76,14 @@ canvas.addEventListener('mousemove', (e) => {
         currentLine.endY = y;
         drawImage();
         drawLines();
+
+        // Temporarily draw the line while dragging
+        ctx.strokeStyle = currentLine.color || '#000000';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(currentLine.startX, currentLine.startY);
+        ctx.lineTo(currentLine.endX, currentLine.endY);
+        ctx.stroke();
     } else if (selectedLine && isDragging) {
         const dx = x - startX;
         const dy = y - startY;
@@ -94,6 +97,7 @@ canvas.addEventListener('mousemove', (e) => {
         drawLines();
     }
 });
+
 
 canvas.addEventListener('mouseup', (e) => {
     if (deleteMode) return;
@@ -113,15 +117,7 @@ canvas.addEventListener('mouseup', (e) => {
     }
 });
 
-// Line editing inputs
-lineNameInput.addEventListener('input', () => {
-    if (currentLine) {
-        currentLine.name = lineNameInput.value;
-    } else if (selectedLine) {
-        selectedLine.name = lineNameInput.value;
-    }
-});
-
+// Line color input
 lineColorInput.addEventListener('input', () => {
     if (currentLine) {
         currentLine.color = lineColorInput.value;
@@ -180,7 +176,6 @@ exportJsonButton.addEventListener('click', () => {
         start: { x: Math.round(line.startX), y: Math.round(line.startY) },
         end: { x: Math.round(line.endX), y: Math.round(line.endY) },
         length: Math.round(Math.sqrt(Math.pow(line.endX - line.startX, 2) + Math.pow(line.endY - line.startY, 2))),
-        name: line.name,
         color: line.color
     })) };
     const blob = new Blob([JSON.stringify(linesData, null, 2)], { type: 'application/json' });
@@ -205,12 +200,11 @@ function drawLines() {
     ctx.lineWidth = 2;
     lines.forEach(line => {
         ctx.strokeStyle = line.color || '#000000'; // Use line color
-        ctx.fillStyle = 'black';
         ctx.beginPath();
         ctx.moveTo(line.startX, line.startY);
         ctx.lineTo(line.endX, line.endY);
         ctx.stroke();
-        ctx.fillText(`ID: ${line.id}, ${line.name || 'Line'}, Length: ${Math.round(Math.sqrt(Math.pow(line.endX - line.startX, 2) + Math.pow(line.endY - line.startY, 2)))} px`, line.startX + 5, line.startY - 5);
+        ctx.fillText(`ID: ${line.id}, Length: ${Math.round(Math.sqrt(Math.pow(line.endX - line.startX, 2) + Math.pow(line.endY - line.startY, 2)))} px`, line.startX + 5, line.startY - 5);
     });
 }
 
