@@ -7,20 +7,25 @@ const brightnessIncreaseButton = document.getElementById('brightness-increase');
 const brightnessDecreaseButton = document.getElementById('brightness-decrease');
 const contrastIncreaseButton = document.getElementById('contrast-increase');
 const contrastDecreaseButton = document.getElementById('contrast-decrease');
+const lineNameInput = document.getElementById('line-name');
+const lineColorInput = document.getElementById('line-color');
 
 let img = new Image();
 let lines = [];
 let deleteMode = false;
 let brightness = 1;
 let contrast = 1;
+let isResizing = false;
+let isDragging = false;
 let startX, startY;
-let currentLineId = null;
+let selectedLine = null;
+let currentLine = null;
 let nextLineId = 1;
 
 upload.addEventListener('change', (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = (event) => {
         img.src = event.target.result;
         img.onload = () => {
             canvas.width = img.width;
@@ -34,41 +39,95 @@ upload.addEventListener('change', (e) => {
 canvas.addEventListener('mousedown', (e) => {
     if (deleteMode) return;
 
-    startX = e.offsetX;
-    startY = e.offsetY;
-    currentLineId = { id: nextLineId++, startX, startY, line: null };
+    const x = e.offsetX;
+    const y = e.offsetY;
+
+    selectedLine = lines.find(line => isNearLineEnd(x, y, line));
+
+    if (selectedLine) {
+        startX = x;
+        startY = y;
+        isResizing = isNearPoint(x, y, selectedLine.endX, selectedLine.endY);
+        isDragging = !isResizing;
+        lineNameInput.value = selectedLine.name || '';
+        lineColorInput.value = selectedLine.color || '#000000';
+    } else {
+        currentLine = { 
+            id: nextLineId++, 
+            startX: x, 
+            startY: y, 
+            endX: x, 
+            endY: y, 
+            name: lineNameInput.value, 
+            color: lineColorInput.value 
+        };
+        isDragging = true;
+    }
 });
 
 canvas.addEventListener('mousemove', (e) => {
-    if (deleteMode || currentLineId === null) return;
+    if (deleteMode) return;
 
-    const endX = e.offsetX;
-    const endY = e.offsetY;
-    drawImage();
-    drawLines();
-    ctx.beginPath();
-    ctx.moveTo(currentLineId.startX, currentLineId.startY);
-    ctx.lineTo(endX, endY);
-    ctx.stroke();
+    const x = e.offsetX;
+    const y = e.offsetY;
+
+    if (isResizing && selectedLine) {
+        selectedLine.endX = x;
+        selectedLine.endY = y;
+        drawImage();
+        drawLines();
+    } else if (isDragging && currentLine) {
+        currentLine.endX = x;
+        currentLine.endY = y;
+        drawImage();
+        drawLines();
+    } else if (selectedLine && isDragging) {
+        const dx = x - startX;
+        const dy = y - startY;
+        selectedLine.startX += dx;
+        selectedLine.startY += dy;
+        selectedLine.endX += dx;
+        selectedLine.endY += dy;
+        startX = x;
+        startY = y;
+        drawImage();
+        drawLines();
+    }
 });
 
 canvas.addEventListener('mouseup', (e) => {
-    if (deleteMode || currentLineId === null) return;
+    if (deleteMode) return;
 
-    const endX = e.offsetX;
-    const endY = e.offsetY;
-    const lineLength = Math.sqrt(Math.pow(endX - currentLineId.startX, 2) + Math.pow(endY - currentLineId.startY, 2));
-    lines.push({
-        id: currentLineId.id,
-        startX: currentLineId.startX,
-        startY: currentLineId.startY,
-        endX: endX,
-        endY: endY,
-        length: lineLength
-    });
-    currentLineId = null;
-    drawImage();
-    drawLines();
+    if (currentLine) {
+        currentLine.endX = e.offsetX;
+        currentLine.endY = e.offsetY;
+        lines.push(currentLine);
+        currentLine = null;
+        drawImage();
+        drawLines();
+    }
+
+    if (selectedLine) {
+        isResizing = false;
+        isDragging = false;
+    }
+});
+
+// Line editing inputs
+lineNameInput.addEventListener('input', () => {
+    if (currentLine) {
+        currentLine.name = lineNameInput.value;
+    } else if (selectedLine) {
+        selectedLine.name = lineNameInput.value;
+    }
+});
+
+lineColorInput.addEventListener('input', () => {
+    if (currentLine) {
+        currentLine.color = lineColorInput.value;
+    } else if (selectedLine) {
+        selectedLine.color = lineColorInput.value;
+    }
 });
 
 canvas.addEventListener('click', (e) => {
@@ -120,7 +179,9 @@ exportJsonButton.addEventListener('click', () => {
         id: line.id,
         start: { x: Math.round(line.startX), y: Math.round(line.startY) },
         end: { x: Math.round(line.endX), y: Math.round(line.endY) },
-        length: Math.round(line.length)
+        length: Math.round(Math.sqrt(Math.pow(line.endX - line.startX, 2) + Math.pow(line.endY - line.startY, 2))),
+        name: line.name,
+        color: line.color
     })) };
     const blob = new Blob([JSON.stringify(linesData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -142,17 +203,25 @@ function drawImage() {
 
 function drawLines() {
     ctx.lineWidth = 2;
-    ctx.strokeStyle = 'red';
-    ctx.fillStyle = 'yellow';
     lines.forEach(line => {
+        ctx.strokeStyle = line.color || '#000000'; // Use line color
+        ctx.fillStyle = 'black';
         ctx.beginPath();
         ctx.moveTo(line.startX, line.startY);
         ctx.lineTo(line.endX, line.endY);
         ctx.stroke();
-        ctx.fillText(`ID: ${line.id}, Length: ${Math.round(line.length)} px`, line.startX + 5, line.startY - 5);
+        ctx.fillText(`ID: ${line.id}, ${line.name || 'Line'}, Length: ${Math.round(Math.sqrt(Math.pow(line.endX - line.startX, 2) + Math.pow(line.endY - line.startY, 2)))} px`, line.startX + 5, line.startY - 5);
     });
 }
 
+function isNearLineEnd(x, y, line) {
+    return isNearPoint(x, y, line.startX, line.startY) || isNearPoint(x, y, line.endX, line.endY);
+}
+
+function isNearPoint(x, y, px, py) {
+    const tolerance = 5;
+    return Math.sqrt(Math.pow(x - px, 2) + Math.pow(y - py, 2)) <= tolerance;
+}
 
 function updateLineIds() {
     // Reassign IDs to lines and adjust the nextLineId
@@ -161,4 +230,3 @@ function updateLineIds() {
     });
     nextLineId = lines.length + 1; // Update nextLineId for new lines
 }
-
