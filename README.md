@@ -30,5 +30,23 @@ You can try out a live version of the tool [here](https://dhanush-s-gowda.github
 
 This project was created using AI (GPT) and contributions from:
 
-- [Dhanush S Gowda](https://github.com/Dhanush-S-Gowda)
-- [R Keerthana Prasad](https://github.com/Keerthana-prasad)
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/Dhanush-S-Gowda">
+      <img src="https://avatars.githubusercontent.com/Dhanush-S-Gowda" width="50px;" alt="Dhanush S Gowda"/><br />
+      <b>Dhanush S Gowda</b>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Keerthana-prasad">
+      <img src="https://avatars.githubusercontent.com/Keerthana-prasad" width="50px;" alt="R Keerthana Prasad"/><br />
+      <b>R Keerthana Prasad</b>
+      </a>
+    </td>
+  </tr>
+</table>
+
+
+
+
