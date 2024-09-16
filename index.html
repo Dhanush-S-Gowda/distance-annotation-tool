@@ -19,6 +19,17 @@
         }
         .controls {
             margin: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .controls > * {
+            margin: 5px;
+        }
+        .line-options {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
     </style>
 </head>
@@ -27,13 +38,16 @@
         <input type="file" id="upload" accept="image/*">
         <canvas id="canvas"></canvas>
         <div class="controls">
-            <!-- Remove zoom buttons -->
             <button id="export-json">Export as JSON</button>
             <button id="delete-mode">Toggle Eraser Mode</button>
             <button id="brightness-increase">Increase Brightness</button>
             <button id="brightness-decrease">Decrease Brightness</button>
             <button id="contrast-increase">Increase Contrast</button>
             <button id="contrast-decrease">Decrease Contrast</button>
+            <div class="line-options">
+                <input type="text" id="line-name" placeholder="Line Name">
+                <input type="color" id="line-color" value="#000000">
+            </div>
         </div>
     </div>
     <script src="app.js"></script>
